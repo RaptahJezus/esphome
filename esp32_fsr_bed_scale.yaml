@@ -1,0 +1,106 @@
+esphome:
+  name: esp32_fsr_bed_scale
+  platform: ESP32
+  board: nodemcu-32s
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  domain: !secret homedomain
+  ap:
+    ssid: "FSR Bed Scale Fallback Hotspot"
+    password: !secret ap_password
+  fast_connect: true
+  reboot_timeout: 5min
+
+captive_portal:
+
+# Enable logging
+logger:
+
+api:
+  password: !secret api_password
+
+ota:
+  password: !secret ota_password
+
+sensor:
+  - platform: adc
+    pin: 39
+    update_interval: 2s
+    internal: true
+    filters:
+    - sliding_window_moving_average:
+        window_size: 5
+        send_every: 5
+    accuracy_decimals: 4
+    id: "fsr_left_adc"
+
+  - platform: adc
+    pin: 34
+    update_interval: 2s
+    internal: true
+    filters:
+    - sliding_window_moving_average:
+        window_size: 5
+        send_every: 5
+    accuracy_decimals: 4
+    id: "fsr_right_adc"
+
+
+  - platform: template
+    name: "Bed FSR Left"
+    lambda: |-
+      return (id(fsr_left_adc).state);
+    update_interval: 30s
+    accuracy_decimals: 4
+    unit_of_measurement: V
+
+  - platform: template
+    name: "Bed FSR Right"
+    lambda: |-
+      return (id(fsr_right_adc).state);
+    update_interval: 30s
+    unit_of_measurement: V
+    accuracy_decimals: 4
+
+  - platform: template
+    name: "Bed Combined Mass"
+    lambda: |-
+      return (id(fsr_right_adc).state + id(fsr_left_adc).state);
+    update_interval: 30s
+    unit_of_measurement: V
+    accuracy_decimals: 4
+
+binary_sensor:
+  - platform: template
+    name: "Bed Left Occupied"
+    lambda: |-
+      if (id(fsr_left_adc).state >= 0.22) {
+        return true;
+      } else {
+        return false;
+      }
+
+  - platform: template
+    name: "Bed Right Occupied"
+    lambda: |-
+      if (id(fsr_right_adc).state >= 0.27) {
+        return true;
+      } else {
+        return false;
+      }
+
+  - platform: template
+    name: "Bed Occupied"
+    lambda: |-
+      if ((id(fsr_right_adc).state >= 0.27) | (id(fsr_left_adc).state >= 0.22)) {
+        return true;
+      } else {
+        return false;
+      }
+
+
+  - platform: status
+    name: Bed FSR Status
+

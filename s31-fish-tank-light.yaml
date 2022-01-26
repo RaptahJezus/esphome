@@ -1,0 +1,13 @@
+---
+substitutions:
+  devicename: esphome_plug_02
+  friendly_name: 5 Gallon Fish Tank Light
+
+light:
+  - platform: binary
+    name: "${friendly_name}"
+    icon: mdi:fish
+    output: relay
+
+packages:
+  test: !include base-sonoff-s31.yaml

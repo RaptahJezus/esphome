@@ -1,0 +1,13 @@
+---
+substitutions:
+  devicename: esphome_plug_04
+  friendly_name: Growlight 1
+
+light:
+  - platform: binary
+    name: "${friendly_name}"
+    icon: mdi:sprout
+    output: relay
+
+packages:
+  test: !include base-sonoff-s31.yaml

@@ -1,0 +1,13 @@
+---
+substitutions:
+  devicename: esphome_plug_00
+  friendly_name: Snake Light
+
+light:
+  - platform: binary
+    name: "${friendly_name}"
+    icon: mdi:snake
+    output: relay
+
+packages:
+  test: !include base-sonoff-s31.yaml
